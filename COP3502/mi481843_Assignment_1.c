@@ -35,8 +35,8 @@ int main(){
         christmasList[i].present_name = (char*)malloc(20*sizeof(char));
         strcpy(christmasList[i].present_name, "present");
     }
-
-    if(delete_present_list(christmasList, 4) != NULL){
+      christmasList = delete_present_list(christmasList, 4);
+    if(christmasList != NULL){
         printf("Delete Unsuccessful.");
     }
     else{
