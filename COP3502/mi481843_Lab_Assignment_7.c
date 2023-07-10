@@ -17,7 +17,7 @@ void myFlush ();
 int bubbleSort(int arr[], int n);
 
 int main(){
-int arr[] = {0,9,3,2,4,5,7,2,1};
+int arr[] = {97, 16,  45,  63,  13,  22,  7,  58,  72};
 for(int i =0; i < 9; i++)
     printf("%d," , arr[i]);
 
