@@ -1,0 +1,142 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Trie structure
+struct Trie
+{
+    int count;
+    struct Trie* next[26];
+} ;
+
+
+
+// computes the number of occurances of the word
+int numberOfOccurances(struct Trie *pTrie, char *word)
+{
+    int i =0;
+    int pos = 'a' - word[i];
+    struct Trie* temp=  pTrie;
+
+    while (i < strlen(word))
+    {
+        i++;
+        pos = word[i]-'a' ;
+
+        if(temp == NULL)
+            return 0;
+        temp = temp->next[pos];
+    }
+
+    return temp->count;
+}
+
+// deallocate the trie structure
+struct Trie *deallocateTrie(struct Trie *pTrie)
+{
+
+    for(int i = 0; i < 26; i++)
+        if(pTrie->next[i] != NULL)
+           deallocateTrie(pTrie->next[i]);
+
+    free(pTrie);
+    pTrie = NULL;
+
+    return pTrie ;
+}
+
+// Initializes a trie structure
+struct Trie *createTrie()
+{
+    int i;
+    struct Trie* res = (struct Trie*) malloc(sizeof(struct Trie));
+
+    for( i = 0; i < 26; i++)
+        res->next[i] =NULL;
+
+    return res;
+}
+// Inserts the  word to the trie structure
+void insert(struct Trie *pTrie, char *word, int base)
+{
+    if (base == strlen(word)) {
+        pTrie->count = 1;
+        return;
+    }
+
+    int nextIndex = word[base] - 'a';
+    if (pTrie->next[nextIndex] == NULL)
+        pTrie->next[nextIndex] = createTrie();
+    insert(pTrie->next[nextIndex], word, base+1);
+}
+// this function will return number of words in the dictionary,
+// and read all the words in the dictionary to the structure words
+int readDictionary(char *fileName, char **pInWords)
+{
+    FILE* inFile = fopen(fileName, "r");
+    int dataSz = 0;
+
+    if (inFile)
+    {
+        fscanf(inFile, "%d\n", &dataSz);
+        *pInWords = (char*) malloc(sizeof(char*) * dataSz);
+
+        if (pInWords == NULL)
+        {
+            printf("Cannot allocate memory\n");
+            exit(-1);
+        }
+
+        for (int i = 0; i < dataSz; ++i)
+        {
+
+            char buffer[100];
+            fscanf(inFile, "%s", buffer);
+            pInWords[i] = (char*) malloc(strlen(buffer) + 1);
+
+            if (pInWords[i] == NULL)
+            {
+                printf("Cannot allocate memory\n");
+                exit(-1);
+            }
+
+            strcpy(pInWords[i], buffer);
+
+        }
+
+        fclose(inFile);
+    }
+
+    return dataSz;
+}
+
+
+int main(void)
+{
+    char *inWords[256];
+
+
+    //read the number of the words in the dictionary
+    int numWords = readDictionary("dictionary.txt", inWords);
+    for (int i=0;i<numWords;++i)
+    {
+        printf("%s\n",inWords[i]);
+    }
+
+    struct Trie *pTrie = createTrie();
+    for (int i=0;i<numWords;i++)
+    {
+
+        insert(pTrie, inWords[i], strlen(inWords[i]));
+    }
+    // parse lineby line, and insert each word to the trie data structure
+    char *pWords[] = {"notaword", "ucf", "no", "note", "corg"};
+    for (int i=0;i<5;i++)
+    {
+        printf("\t%s : %d\n", pWords[i], numberOfOccurances(pTrie, pWords[i]));
+    }
+    pTrie = deallocateTrie(pTrie);
+    if (pTrie != NULL)
+        printf("There is an error in this program\n");
+    return 0;
+}
